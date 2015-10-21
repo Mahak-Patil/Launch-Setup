@@ -7,6 +7,8 @@ Your shell script must take 5 commandline arguments ($1 $2....) (See video demo 
 1) ami image-id
 2) count
 3) instance-type
-4) key pair
-5) security-group-ids
-6) subnet
+4) security-group-ids
+5) subnet id
+6) Key name
+7) iam profile
+
