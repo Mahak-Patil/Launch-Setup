@@ -1,0 +1,1 @@
+aws ec2 run-instances --image-id  ami-d05e75b8 --count 3 --instance-type t2.micro --security-group-ids $4 --subnet-id $5 --key-name $6 --iam-profile $7
