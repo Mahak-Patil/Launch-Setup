@@ -22,4 +22,5 @@ aws cloudwatch put-metric-alarm --alarm-name cpugreaterthan30 --alarm-descriptio
 #Create Autoscaling group including items
 aws autoscaling create-auto-scaling-group --auto-scaling-group-name itmo-544-extended-auto-scaling-group-2 --launch-configuration-name itmo544-launch-config --load-balancer-names ITMO-544-mini-project-load-balancer  --health-check-type ELB --min-size 3 --max-size 6 --desired-capacity 3 --default-cooldown 600 --health-check-grace-period 120 --vpc-zone-identifier subnet-cccce295 
 
-#Create AWS RDS instances and set schema
+#Create AWS RDS instances 
+aws rds-create-db-instance ITMO-544-Database --engine MySQL 
