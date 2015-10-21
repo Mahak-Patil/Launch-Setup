@@ -13,5 +13,13 @@ aws elb configure-health-check --load-balancer-name ITMO-544-mini-project-load-b
 #congiguring a cookie-stickiness policy for the lad balancer
 aws elb create-lb-cookie-stickiness-policy --load-balancer-name ITMO-544-mini-project-load-balancer --policy-name ITMO-544-cookie-policy --cookie-expiration-period 60
 
+#Create cloud watch metrics
+aws cloudwatch put-metric-alarm --alarm-name cpugreaterthan30 --alarm-description "Alarm when CPU exceeds 30 percent" --metric-name CPUUtilization 
+--namespace AWS/EC2 --statistic Average --period 300 --threshold 30 --comparison-operator GreaterThanThreshold  --dimensions 
+ Name=InstanceId,Value=i-12345678 --evaluation-periods 2 --alarm-actions arn:aws:sns:us-east-1:111122223333:MyTopic --unit Percent
 
 
+#Create Autoscaling group including items
+aws autoscaling create-auto-scaling-group --auto-scaling-group-name itmo-544-extended-auto-scaling-group-2 --launch-configuration-name itmo544-launch-config --load-balancer-names ITMO-544-mini-project-load-balancer  --health-check-type ELB --min-size 3 --max-size 6 --desired-capacity 3 --default-cooldown 600 --health-check-grace-period 120 --vpc-zone-identifier subnet-cccce295 
+
+#Create AWS RDS instance
