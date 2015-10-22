@@ -25,7 +25,4 @@ Timestamp (DateTime),
 )";
 
 $con->query($sql);
-
-
-
 ?>
