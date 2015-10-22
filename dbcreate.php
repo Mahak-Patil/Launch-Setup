@@ -11,9 +11,14 @@ echo "Here is the result: " . $link;
 $sql = "CREATE TABLE comments 
 (
 ID INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-PosterName VARCHAR(32),
-Title VARCHAR(32),
-Content VARCHAR(500)
+uName VARCHAR(20),
+email VARCHAR(20),
+phone VARCHAR(20),
+rawS3Url VARCHAR(256),
+finishedS3Url VARCHAR(256),
+jpgFileName VARCHAR(256),
+state TINYINT(3),
+Timestamp (DateTime),
 )";
 
 $con->query($sql);
