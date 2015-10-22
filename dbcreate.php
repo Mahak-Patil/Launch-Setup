@@ -1,5 +1,3 @@
-
-
 <?php
 //conection: 
 echo "Hello world"; 
