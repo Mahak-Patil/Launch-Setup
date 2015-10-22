@@ -3,7 +3,7 @@
 <?php
 //conection: 
 echo "Hello world"; 
-$link = mysqli_connect("itmo544jrhdb","controller","ilovebunnies","3306") or die("Error " . mysqli_error($link)); 
+$link = mysqli_connect("localhost","ITMO-544-Fall-2015","ilovebunnies","3306") or die("Error " . mysqli_error($link)); 
 
 echo "Here is the result: " . $link;
 
