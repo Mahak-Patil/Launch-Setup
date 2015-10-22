@@ -25,7 +25,7 @@ aws autoscaling create-auto-scaling-group --auto-scaling-group-name itmo-544-ext
 #Create AWS RDS instances 
 aws rds-create-db-instance ITMO-544-Database --engine MySQL 
 
-#set database schema
+#database schema in setup.php
 
 #Create read replica
 aws rds-create-db-instance-read-replica ITM)-544-Database-replica --source-db-instance-identifier-value ITMO-544-Database
