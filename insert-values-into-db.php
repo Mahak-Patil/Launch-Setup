@@ -45,8 +45,4 @@ while ($row = $res->fetch_assoc()) {
 
 
 $link->close();
-
-
-
-
 ?>
