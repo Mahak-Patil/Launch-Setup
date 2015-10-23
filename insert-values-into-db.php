@@ -1,5 +1,5 @@
 <?php
-//this is a comment
+
 echo "begin database";
 $link = mysqli_connect("itmo544jrhdb.cpyht2c1c9a4.us-east-1.rds.amazonaws.com","controller","ilovebunnies","itmo544db") or die("Error " . mysqli_error($link));
 
