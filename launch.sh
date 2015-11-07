@@ -35,5 +35,10 @@ aws rds-create-db-instance-read-replica ITM0-544-db-replica --source-db-instance
 # launch load balancer
 aws elb configure-health-check --load-balancer-name ITMO-544-lb --health-check Target=HTTP:80/index.html,Interval=30,UnhealthyThreshold=2,HealthyThreshold=2,Timeout=3
 
+#Create cloud watch metrics
+aws cloudwatch put-metric-alarm --alarm-name cpugreaterthan30 --alarm-description "Alarm when CPU exceeds 30 percent" --metric-name CPUUtilization 
+--namespace AWS/EC2 --statistic Average --period 300 --threshold 30 --comparison-operator GreaterThanThreshold  --dimensions 
+ Name=InstanceId,Value=i-12345678 --evaluation-periods 2 --alarm-actions arn:aws:sns:us-east-1:111122223333:MyTopic --unit Percent
+
 #Create Autoscaling group including items
 aws autoscaling create-auto-scaling-group --auto-scaling-group-name ITMO-544-extended-auto-scaling-group-1 --launch-configuration-name ITMO-544-launch-config --load-balancer-names ITMO-544-lb --health-check-type ELB --min-size 3 --max-size 6 --desired-capacity 3 --default-cooldown 600 --health-check-grace-period 120 --vpc-zone-identifier subnet-cccce295 
