@@ -8,7 +8,23 @@
 aws rds create-db-subnet-group --db-subnet-group-name ITMO544-Database-Subnet --subnet-ids subnet-0fdfdd78 subnet-f7a25eca  --db-subnet-group-description "Database Subnet"
 
 # create AWS RDS instances
-rds-create-db-instance ITMO-544-db --engine MySQL 
+mapfile -t dbInstanceARR < <(aws rds describe-db-instances --output json | grep "\"DBInstanceIdentifier" | sed "s/[\"\:\, ]//g" | sed "s/DBInstanceIdentifier//g" )
+
+if [ ${#dbInstanceARR[@]} -gt 0 ]
+   then
+   echo "Deleting existing RDS database-instances"
+   LENGTH=${#dbInstanceARR[@]}
+
+      for (( i=0; i<${LENGTH}; i++));
+      do
+      if [ ${dbInstanceARR[i]} == "ITMO-544-db" ] 
+     then 
+      echo "db exists"
+     else
+     aws rds create-db-instance --db-instance-identifier ITMO-544-db --db-instance-class db.t1.micro --engine MySQL --master-username controller --master-user-password ilovebunnies --allocated-storage 5
+      fi  
+     done
+fi
 
 # launch instances here:
 aws ec2 run-instances --image-id ami-d05e75b8 --count 3 --instance-type t2.micro --user-data install-webserver.sh --security-group-ids $1 --subnet-id $2 --key-name $3 --iam-profile $4  --associate-public-ip-address
