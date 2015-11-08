@@ -17,7 +17,9 @@ sudo mv vendor /var/www/html &> /tmp/movevendor.txt
 
 sudo php /var/www/html/setup.php &> /tmp/database-setup.txt
 sudo chmod 600 /var/www/html/setup.php
-#cleanup script starts here:
+
+
+#cleanup script provided by Jeremy Hajek starts here:
 
 declare -a cleanupARR 
 declare -a cleanupLBARR
