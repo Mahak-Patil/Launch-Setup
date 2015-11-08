@@ -1,7 +1,11 @@
 #!/bin/bash
 
 # This script launches: database subnet, AWS RDS instances, EC2 instances,read replica of created database, load balancer, cloud metrics and autoscaling group.
-# This script needs 7 arguments: ami image-id, number of EC2 instances, instance type, security group ids, subnet, key name and iam profile
+# This script needs 7 arguments: ami image-id, number of EC2 instances, instance type, security group ids, subnet id, key name and iam profile
+
+echo "Enter arguments in the following order: ami image id (e.g ami-d05e75b8), number of EC2 instances needed (e.g 3), instance type (e.g.t2.micro), security group ID (e.g. sg- ), subnet ID(e.g. subnet- ), key pair name (make sure the path is correct) and IAM Profile: "
+
+
 # launch database here:
 
 # creates a database subnet
