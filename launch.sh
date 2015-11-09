@@ -3,7 +3,9 @@
 # This script launches: database subnet, AWS RDS instances, EC2 instances,read replica of created database, load balancer, cloud metrics and autoscaling group.
 # This script needs 7 arguments: ami image-id, number of EC2 instances, instance type, security group ids, subnet id, key name and iam profile
 
-echo "Initiating cleaup. Please be patient and wait for the next prompt"
+echo "Initiating cleaup... Please be patient and wait for the next prompt"
+
+
 #cleanup script provided by Jeremy Hajek starts here:
 
 declare -a cleanupARR 
@@ -89,7 +91,7 @@ sleep 1
 done
 
 # creating elb 
-ElbUrl=$(aws elb create-load-balancer --load-balancer-name ITMO-544-Load-Balancer --security-groups sg-414a0a26 --subnets $SubnetID1 --listeners Protocol=HTTP,LoadBalancerPort=80,InstanceProtocol=HTTP,InstancePort=80 --output=text)
+ElbUrl=$(aws elb create-load-balancer --load-balancer-name ITMO-544-Load-Balancer --security-groups $4 --subnets $5 --listeners Protocol=HTTP,LoadBalancerPort=80,InstanceProtocol=HTTP,InstancePort=80 --output=text)
 echo "\nLaunched ELB and sleeping for one minute"
 for i in {0..60}
  do
@@ -102,7 +104,7 @@ aws elb configure-health-check --load-balancer-name ITMO-544-Load-Balancer --hea
 echo -e "\nConfigured ELB health check. Proceeding to launch EC2 instances"
   
 # launching ec2 instances
-aws ec2 run-instances --image-id ami-d05e75b8 --count 3 --instance-type t2.micro --key-name ITMO-544-Key-Pair --user-data file://install-webserver.sh --subnet-id subnet-0fdfdd78 --output text --security-group-ids sg-414a0a26 --iam-instance-profile Name=phpDeveloper
+aws ec2 run-instances --image-id $1 --count $2 --instance-type $3 --key-name $4 --user-data file://install-webserver.sh --subnet-id $5 --output text --security-group-ids $4 --iam-instance-profile Name=$7
 echo -e "\nLaunched 3 EC2 Instances and sleeping for one minute"
 for i in {0..60}
  do
