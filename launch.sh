@@ -104,7 +104,7 @@ aws elb configure-health-check --load-balancer-name ITMO-544-Load-Balancer --hea
 echo -e "\nConfigured ELB health check. Proceeding to launch EC2 instances"
   
 # launching ec2 instances
-aws ec2 run-instances --image-id $1 --count $2 --instance-type $3 --key-name $4 --user-data file://install-webserver.sh --subnet-id $5 --output text --security-group-ids $4 --iam-instance-profile Name=$7
+aws ec2 run-instances --image-id $1 --count $2 --instance-type $3 --key-name $4 --user-data install-webserver.sh --subnet-id $5 --output text --security-group-ids $4 --iam-instance-profile Name=$7
 echo -e "\nLaunched 3 EC2 Instances and sleeping for one minute"
 for i in {0..60}
  do
@@ -115,7 +115,7 @@ for i in {0..60}
  
 # registering instances with crested elb
 declare -a instance_list
-mapfile -t instance_list < <(aws ec2 run-instances --image-id $1 --count $2 --instance-type $3 --key-name $4 --security-group-ids $5 --subnet-id $6 --associate-public-ip-address --iam-instance-profile Name=$7 --user-data file://install-webserver.sh --output table | grep InstanceId | sed "s/|//g" | tr -d ' ' | sed "s/InstanceId//g")
+mapfile -t instance_list < <(aws ec2 run-instances --image-id $1 --count $2 --instance-type $3 --key-name $4 --security-group-ids $5 --subnet-id $6 --associate-public-ip-address --iam-instance-profile Name=$7 --user-data install-webserver.sh --output table | grep InstanceId | sed "s/|//g" | tr -d ' ' | sed "s/InstanceId//g")
 aws ec2 wait instance-running --instance-ids ${instance_list[@]} 
 aws ec2 wait instance-running --instance-ids ${instance_list[@]} 
 echo "Following instances running: ${instance_list[@]}" 
@@ -135,7 +135,7 @@ echo -e "\n Sleeping for one minute to complete the process."
 done
 
 # creating launch configuration
-aws autoscaling create-launch-configuration --launch-configuration-name ITMO-544-Launch-Configuration --image-id $1 --key-name $6 --security-groups $4 --instance-type $3 --user-data /home/controller/Documents/MP1-Environment-Setup/install-env.sh --iam-instance-profile $7
+aws autoscaling create-launch-configuration --launch-configuration-name ITMO-544-Launch-Configuration --image-id $1 --key-name $6 --security-groups $4 --instance-type $3 --user-data install-webserver.sh --iam-instance-profile $7
 
 # creating autoscaling group and autoscaling policy
 aws autoscaling create-auto-scaling-group --auto-scaling-group-name ITMO-544-Auto-Scaling-Group --launch-configuration-name ITMO-544-Launch-Configuration --load-balancer-names ITMO-544-Load-Balancer --health-check-type ELB --min-size 3 --max-size 6 --desired-capacity 3 --default-cooldown 600 --health-check-grace-period 120 --vpc-zone-identifier $5
