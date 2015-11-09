@@ -9,29 +9,24 @@
 <body>
 
 <?php
+// NOTE: code provided by Jeremy Hajek is modified.
 session_start();
-$email = $_POST["email"];
-echo $email;
 require 'vendor/autoload.php';
 
+//create client for s3 bucket
 use Aws\Rds\RdsClient;
 $client = RdsClient::factory(array(
 'region'  => 'us-east-1'
 ));
 
-$result = $client->describeDBInstances(array(
-    'DBInstanceIdentifier' => 'itmo544jrhdb',
-));
+$result = $client->describeDBInstances(['DBInstanceIdentifier' => 'ITMO-544-Database',
+]);
 
 $endpoint = "";
+$endpoint = $result['DBInstances'][0]['Endpoint']['Address'];
 
-foreach ($result->getPath('DBInstances/*/Endpoint/Address') as $ep) {
-    // Do something with the message
-    echo "============". $ep . "================";
-    $endpoint = $ep;
-}   
 //echo "begin database";
-$link = mysqli_connect($endpoint,"controller","ilovebunnies","itmo544db") or die("Error " . mysqli_error($link));
+$link = mysqli_connect($endpoint,"controller","ilovebunnies","ITMO-544-Database") or die("Error " . mysqli_error($link));
 
 /* check connection */
 if (mysqli_connect_errno()) {
@@ -40,14 +35,9 @@ if (mysqli_connect_errno()) {
 }
 
 //below line is unsafe - $email is not checked for SQL injection -- don't do this in real life or use an ORM instead
-$link->real_query("SELECT * FROM items WHERE email = '$email'");
+$link->real_query("SELECT * FROM ITM)-544-Database");
 //$link->real_query("SELECT * FROM items");
 $res = $link->use_result();
-echo "Result set order...\n";
-while ($row = $res->fetch_assoc()) {
-    echo "<img src =\" " . $row['s3rawurl'] . "\" /><img src =\"" .$row['s3finishedurl'] . "\"/>";
-echo $row['id'] . "Email: " . $row['email'];
-}
 $link->close();
 ?>
 </body>
