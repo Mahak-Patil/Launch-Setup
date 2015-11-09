@@ -81,7 +81,7 @@ echo "\nEnter arguments in the following order: ami image id (e.g ami-d05e75b8),
 # creating database subnet
 DbSubnetID=$(aws rds create-db-subnet-group --db-subnet-group-name ITMO-544-Database-Subnet --subnet-ids $SubnetID1 $SubnetID2 --db-subnet-group-description "Database subnet" --output=text)
 echo "\nDatabase subnet created: "$DbSubnetID
-# creating the database
+# creating the database. Initial check done in previous, cleanup section.
 aws rds create-db-instance --db-instance-identifier ITMO-544-Database --allocated-storage 5 --db-instance-class db.t1.micro --engine MySQL --master-username controller --master-user-password ilovebunnies --db-subnet-group-name ITMO-544-Database-Subnet --db-name ITMO-544-Database 
 cho "Sleeping for one minute"
 for i in {0..60}
@@ -134,61 +134,16 @@ echo -e "\n Sleeping for one minute to complete the process."
  echo "\n"
 done
 
+# creating launch configuration
+aws autoscaling create-launch-configuration --launch-configuration-name ITMO-544-Launch-Configuration --image-id $1 --key-name $6 --security-groups $4 --instance-type $3 --user-data /home/controller/Documents/MP1-Environment-Setup/install-env.sh --iam-instance-profile $7
 
+# creating autoscaling group and autoscaling policy
+aws autoscaling create-auto-scaling-group --auto-scaling-group-name ITMO-544-Auto-Scaling-Group --launch-configuration-name ITMO-544-Launch-Configuration --load-balancer-names ITMO-544-Load-Balancer --health-check-type ELB --min-size 3 --max-size 6 --desired-capacity 3 --default-cooldown 600 --health-check-grace-period 120 --vpc-zone-identifier $5
+aws autoscaling put-scaling-policy --auto-scaling-group-name ITMO-544-Auto-Scaling-Group --policy-name ITMO-544-Scaling-Policy --scaling-adjustment 1 --adjustment-type ExactCapacity
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# launch database here:
-
-# creates a database subnet
-aws rds create-db-subnet-group --db-subnet-group-name ITMO544-Database-Subnet --subnet-ids subnet-0fdfdd78 subnet-f7a25eca  --db-subnet-group-description "Database Subnet"
-
-# create AWS RDS instances
-mapfile -t dbInstanceARR < <(aws rds describe-db-instances --output json | grep "\"DBInstanceIdentifier" | sed "s/[\"\:\, ]//g" | sed "s/DBInstanceIdentifier//g" )
-
-if [ ${#dbInstanceARR[@]} -gt 0 ]
-   then
-   echo "Deleting existing RDS database-instances"
-   LENGTH=${#dbInstanceARR[@]}
-
-      for (( i=0; i<${LENGTH}; i++));
-      do
-      if [ ${dbInstanceARR[i]} == "ITMO-544-db" ] 
-     then 
-      echo "db exists"
-     else
-     aws rds create-db-instance --db-instance-identifier ITMO-544-db --db-instance-class db.t1.micro --engine MySQL --master-username controller --master-user-password ilovebunnies --allocated-storage 5
-      fi  
-     done
-fi
-
-# launch instances here:
-aws ec2 run-instances --image-id ami-d05e75b8 --count 3 --instance-type t2.micro --user-data install-webserver.sh --security-group-ids $1 --subnet-id $2 --key-name $3 --iam-profile $4  --associate-public-ip-address
+# creating cloudwatch metric. got most of these directly from the documentation!
+aws cloudwatch put-metric-alarm --alarm-name ITMO-544-Alarm --metric-name CPUUtilization --namespace AWS/EC2 --statistic Average --period 60 --threshold 30 --comparison-operator GreaterThanOrEqualToThreshold --dimensions "Name=AutoScalingGroup,Value=ITMO-544-Auto-Scaling-Group" --evaluation-periods 1 --alarm-actions arn:aws:autoscaling:us-west-2:681875787250:scalingPolicy:aeb16e5a-0e52-4eff-aa17-f7f7c5efcbe2:autoScalingGroupName/itmo-544-extended-auto-scaling-group-2:policyName/AravindScalingPolicy
 
 #Create read replica
-aws rds-create-db-instance-read-replica ITM0-544-db-replica --source-db-instance-identifier-value ITMO-544-Database
+aws rds-create-db-instance-read-replica ITM0-544-Database-Replica --source-db-instance-identifier-value ITMO-544-Database
 
-# launch load balancer
-aws elb configure-health-check --load-balancer-name ITMO-544-lb --health-check Target=HTTP:80/index.html,Interval=30,UnhealthyThreshold=2,HealthyThreshold=2,Timeout=3
-
-#Create cloud watch metrics
-aws cloudwatch put-metric-alarm --alarm-name cpugreaterthan30 --alarm-description "Alarm when CPU exceeds 30 percent" --metric-name CPUUtilization 
---namespace AWS/EC2 --statistic Average --period 300 --threshold 30 --comparison-operator GreaterThanThreshold  --dimensions 
- Name=InstanceId,Value=i-12345678 --evaluation-periods 2 --alarm-actions arn:aws:sns:us-east-1:111122223333:MyTopic --unit Percent
-
-#Create Autoscaling group including items
-aws autoscaling create-auto-scaling-group --auto-scaling-group-name ITMO-544-extended-auto-scaling-group-1 --launch-configuration-name ITMO-544-launch-config --load-balancer-names ITMO-544-lb --health-check-type ELB --min-size 3 --max-size 6 --desired-capacity 3 --default-cooldown 600 --health-check-grace-period 120 --vpc-zone-identifier subnet-cccce295 
