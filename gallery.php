@@ -40,5 +40,6 @@ $link->real_query("SELECT * FROM ITM)-544-Database");
 $res = $link->use_result();
 $link->close();
 ?>
+
 </body>
 </html>
