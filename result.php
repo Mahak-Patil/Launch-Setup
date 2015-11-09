@@ -1,7 +1,6 @@
 <?php
 // This script is the modified version of "submit.php" provided by Jeremy Hajek.
 
-
 session_start();
 var_dump($_POST);
 if(!empty($_POST)){
