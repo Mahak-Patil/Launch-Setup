@@ -1,5 +1,5 @@
 # Launch-Setup
-# Notes for launch.sh
+
 
 This script first performs a cleanup: terminates ec2 instances, rds etc so that it gets a clean, freash start.
 
