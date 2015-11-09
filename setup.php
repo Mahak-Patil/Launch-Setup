@@ -32,5 +32,5 @@ CHECK(state IN(0,1,2)),
 datetime timestamp,
 )");
 
-shell_exec("chmod 600 setup.php");
+shell_exec("chmod 600 setup.php"); //NEED TO VERIFY THIS!!
 ?>
