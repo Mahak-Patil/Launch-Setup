@@ -145,5 +145,5 @@ aws autoscaling put-scaling-policy --auto-scaling-group-name ITMO-544-Auto-Scali
 aws cloudwatch put-metric-alarm --alarm-name ITMO-544-Alarm --metric-name CPUUtilization --namespace AWS/EC2 --statistic Average --period 60 --threshold 30 --comparison-operator GreaterThanOrEqualToThreshold --dimensions "Name=AutoScalingGroup,Value=ITMO-544-Auto-Scaling-Group" --evaluation-periods 1 --alarm-actions arn:aws:autoscaling:us-west-2:681875787250:scalingPolicy:aeb16e5a-0e52-4eff-aa17-f7f7c5efcbe2:autoScalingGroupName/itmo-544-extended-auto-scaling-group-2:policyName/AravindScalingPolicy
 
 #Create read replica
-aws rds-create-db-instance-read-replica ITM0-544-Database-Replica --source-db-instance-identifier-value ITMO-544-Database
+aws rds-create-db-instance-read-replica ITM0-544-Database-Replica --source-db-instance-identifier-value ITMO-544-Database --output=text 
 
