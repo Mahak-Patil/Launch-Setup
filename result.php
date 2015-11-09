@@ -4,7 +4,7 @@
 session_start();
 var_dump($_POST);
 if(!empty($_POST)){
-echo $_POST['useremail'];
+echo $_POST['email'];
 echo $_POST['phone'];
 }
 else
