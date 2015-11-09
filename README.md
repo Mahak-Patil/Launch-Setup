@@ -18,7 +18,7 @@ A database subnet (ITMO-544-Database-Subnet) and a database instance (ITMO-544-D
 username is controller and password is ilovebunnies.
 
 An elastic load balancer (ITMO-544-Load-Balancer) will be launched. A health policy will be attached.
-
+ 
 Based on the received command line inputs, ec2 instances will be launched now and "install-webserver.sh" will be loaded on all.
 These ec2 instances will then be registered to the load balancer.
 
