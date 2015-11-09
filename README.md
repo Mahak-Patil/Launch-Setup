@@ -21,3 +21,6 @@ An elastic load balancer (ITMO-544-Load-Balancer) will be launched. A health pol
 
 Based on the received command line inputs, ec2 instances will be launched now and "install-webserver.sh" will be loaded on all.
 These ec2 instances will then be registered to the load balancer.
+
+Created a launch configuration (ITMO-544-Launch-Configuration), autoscaling group (ITMO-544-Auto-Scaling-Group), autoscaling policy (ITMO-544-Scaling-Policy), cloudwatch metric (alarm name: ITMO-544-Alarm) and a read replica of the database (ITMO-544-Database-Replica).
+
