@@ -83,7 +83,7 @@ DbSubnetID=$(aws rds create-db-subnet-group --db-subnet-group-name ITMO-544-Data
 echo "\nDatabase subnet created: "$DbSubnetID
 # creating the database. Initial check done in previous, cleanup section.
 aws rds create-db-instance --db-instance-identifier ITMO-544-Database --allocated-storage 5 --db-instance-class db.t1.micro --engine MySQL --master-username controller --master-user-password ilovebunnies --db-subnet-group-name ITMO-544-Database-Subnet --db-name ITMO-544-Database 
-cho "Sleeping for one minute"
+echo "Sleeping for one minute"
 for i in {0..60}
 do
 echo -ne '.'
