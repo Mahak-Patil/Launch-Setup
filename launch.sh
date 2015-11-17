@@ -144,6 +144,12 @@ aws autoscaling put-scaling-policy --auto-scaling-group-name ITMO-544-Auto-Scali
 # creating cloudwatch metric. got most of these directly from the documentation!
 aws cloudwatch put-metric-alarm --alarm-name ITMO-544-Alarm --metric-name CPUUtilization --namespace AWS/EC2 --statistic Average --period 60 --threshold 30 --comparison-operator GreaterThanOrEqualToThreshold --dimensions "Name=AutoScalingGroup,Value=ITMO-544-Auto-Scaling-Group" --evaluation-periods 1 --alarm-actions arn:aws:sns:us-east-1:111122223333:MyTopic --unit Percent
 
-#Create read replica
+# Create read replica
 aws rds-create-db-instance-read-replica ITM0-544-Database-Replica --source-db-instance-identifier-value ITMO-544-Database --output=text 
+
+# Creating sns topic
+TopicARN = $(aws sns create-topic --name ITMO-544-Notification)
+
+# Setting an attribute of the above topic to a new value
+aws sns set-topic-attributes --topic-arn $TopicARN --attribute-name DisplayName --attribute-value ITMO-544
 
