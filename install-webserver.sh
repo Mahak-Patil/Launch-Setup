@@ -8,8 +8,9 @@ git clone https://github.com/Mahak-Patil/Environment-Setup
 git clone https://github.com/Mahak-Patil/Application-Setup 
 
 sudo mv ./Environment-Setup/images /var/www/html/images
-sudo mv ./Application-Setup/*.php /var/www/html
 sudo mv ./Application-Setup/index.html /var/www/html
+
+sudo mv ./Application-Setup/*.php /var/www/html
 sudo mv ./Launch-Setup/*.css /var/www/html
 sudo mv ./Launch-Setup/*.js /var/www/html
 
