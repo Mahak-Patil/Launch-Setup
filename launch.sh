@@ -153,3 +153,5 @@ TopicARN = $(aws sns create-topic --name ITMO-544-Notification)
 # Setting an attribute of the above topic to a new value
 aws sns set-topic-attributes --topic-arn $TopicARN --attribute-name DisplayName --attribute-value ITMO-544
 
+# subscribing an endpoint to a topic
+aws sns subscribe --topic-arn $TopicARN --protocol sms --notification-endpoint 13123949795
