@@ -55,6 +55,7 @@ aws rds-create-db-instance-read-replica ITM0-544-Database-Replica --source-db-in
 
 # Creating sns topic
 TopicARN = $(aws sns create-topic --name ITMO-544-Notification)
+echo "The topic ARN is: "$TopicARN
 
 # Setting an attribute of the above topic to a new value
 aws sns set-topic-attributes --topic-arn $TopicARN --attribute-name DisplayName --attribute-value ITMO-544
