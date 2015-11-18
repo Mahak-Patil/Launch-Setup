@@ -3,92 +3,12 @@
 # This script launches: database subnet, AWS RDS instances, EC2 instances,read replica of created database, load balancer, cloud metrics and autoscaling group.
 # This script needs 7 arguments: ami image-id, number of EC2 instances, instance type, security group ids, subnet id, key name and iam profile
 
-echo "Initiating cleaup... Please be patient and wait for the next prompt"
-
-
-#cleanup script provided by Jeremy Hajek starts here:
-
-declare -a cleanupARR 
-declare -a cleanupLBARR
-declare -a dbInstanceARR
-
-aws ec2 describe-instances --filter Name=instance-state-code,Values=16 --output table | grep InstanceId | sed "s/|//g" | tr -d ' ' | sed "s/InstanceId//g"
-
-mapfile -t cleanupARR < <(aws ec2 describe-instances --filter Name=instance-state-code,Values=16 --output table | grep InstanceId | sed "s/|//g" | tr -d ' ' | sed "s/InstanceId//g")
-
-echo "the output is ${cleanupARR[@]}"
-
-aws ec2 terminate-instances --instance-ids ${cleanupARR[@]} 
-
-echo "Cleaning up existing Load Balancers"
-mapfile -t cleanupLBARR < <(aws elb describe-load-balancers --output json | grep LoadBalancerName | sed "s/[\"\:\, ]//g" | sed "s/LoadBalancerName//g")
-
-echo "The LBs are ${cleanupLBARR[@]}"
-
-LENGTH=${#cleanupLBARR[@]}
-echo "ARRAY LENGTH IS $LENGTH"
-for (( i=0; i<${LENGTH}; i++)); 
-  do
-  aws elb delete-load-balancer --load-balancer-name ${cleanupLBARR[i]} --output text
-  sleep 1
-done
-
-# Delete existing RDS  Databases
-# Note if deleting a read replica this is not your command 
-mapfile -t dbInstanceARR < <(aws rds describe-db-instances --output json | grep "\"DBInstanceIdentifier" | sed "s/[\"\:\, ]//g" | sed "s/DBInstanceIdentifier//g" )
-
-if [ ${#dbInstanceARR[@]} -gt 0 ]
-   then
-   echo "Deleting existing RDS database-instances"
-   LENGTH=${#dbInstanceARR[@]}  
-
-   # http://docs.aws.amazon.com/cli/latest/reference/rds/wait/db-instance-deleted.html
-      for (( i=0; i<${LENGTH}; i++));
-      do 
-      aws rds delete-db-instance --db-instance-identifier ${dbInstanceARR[i]} --skip-final-snapshot --output text
-      aws rds wait db-instance-deleted --db-instance-identifier ${dbInstanceARR[i]} --output text
-      sleep 1
-   done
-fi
-
-# Create Launchconf and Autoscaling groups
-
-LAUNCHCONF=(`aws autoscaling describe-launch-configurations --output json | grep LaunchConfigurationName | sed "s/[\"\:\, ]//g" | sed "s/LaunchConfigurationName//g"`)
-
-SCALENAME=(`aws autoscaling describe-auto-scaling-groups --output json | grep AutoScalingGroupName | sed "s/[\"\:\, ]//g" | sed "s/AutoScalingGroupName//g"`)
-
-echo "The asgs are: " ${SCALENAME[@]}
-echo "the number is: " ${#SCALENAME[@]}
-
-if [ ${#SCALENAME[@]} -gt 0 ]
-  then
-echo "SCALING GROUPS to delete..."
-#aws autoscaling detach-launch-
-
-aws autoscaling delete-auto-scaling-group --auto-scaling-group-name ITMO-544-Auto-Scaling-Group
-
-aws autoscaling delete-launch-configuration --launch-configuration-name ITMO-544-Launch-Configuration
-
-#aws autoscaling update-auto-scaling-group --auto-scaling-group-name $SCALENAME --min-size 0 --max-size 0
-
-#aws autoscaling delete-auto-scaling-group --auto-scaling-group-name $SCALENAME
-#aws autoscaling delete-launch-configuration --launch-configuration-name $LAUNCHCONF
-fi
-echo "All done! Thank you for your patience"
-
-echo "\nEnter arguments in the following order: ami image id (e.g ami-d05e75b8), number of EC2 instances needed (e.g 3), instance type (e.g.t2.micro), security group ID (e.g. sg- ), subnet ID(e.g. subnet- ), key pair name (make sure the path is correct) and IAM Profile: "
-
 # creating database subnet
-DbSubnetID=$(aws rds create-db-subnet-group --db-subnet-group-name ITMO-544-Database-Subnet --subnet-ids $SubnetID1 $SubnetID2 --db-subnet-group-description "Database subnet" --output=text)
-echo "\nDatabase subnet created: "$DbSubnetID
+DbSubnetID=$(aws rds create-db-subnet-group --db-subnet-group-name ITMO-544-Database-Subnet --subnet-ids subnet-07dd812c subnet-0fdfdd78 --db-subnet-group-description Database-subnet --output=text )
+# echo "\n Database subnet created: "$DbSubnetID
 # creating the database. Initial check done in previous, cleanup section.
 aws rds create-db-instance --db-instance-identifier ITMO-544-Database --allocated-storage 5 --db-instance-class db.t1.micro --engine MySQL --master-username controller --master-user-password ilovebunnies --db-subnet-group-name ITMO-544-Database-Subnet --db-name ITMO-544-Database 
-echo "Sleeping for one minute"
-for i in {0..60}
-do
-echo -ne '.'
-sleep 1
-done
+aws rds wait db-instance-available --db-instance-identifier ITMO-544-Database
 
 # creating elb 
 ElbUrl=$(aws elb create-load-balancer --load-balancer-name ITMO-544-Load-Balancer --security-groups $4 --subnets $5 --listeners Protocol=HTTP,LoadBalancerPort=80,InstanceProtocol=HTTP,InstancePort=80 --output=text)
