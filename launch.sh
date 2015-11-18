@@ -12,7 +12,7 @@ aws rds wait db-instance-available --db-instance-identifier ITMO-544-Database
 
 # creating elb 
 ElbUrl=$(aws elb create-load-balancer --load-balancer-name ITMO-544-Load-Balancer --security-groups $4 --subnets $5 --listeners Protocol=HTTP,LoadBalancerPort=80,InstanceProtocol=HTTP,InstancePort=80 --output=text)
-echo "\nLaunched ELB and sleeping for one minute"
+echo "\n Launched ELB " $ElbUrl " and sleeping for one minute"
 for i in {0..60}
  do
   echo -ne '.'
@@ -23,28 +23,14 @@ for i in {0..60}
 aws elb configure-health-check --load-balancer-name ITMO-544-Load-Balancer --health-check Target=HTTP:80/index.php,Interval=30,UnhealthyThreshold=2,HealthyThreshold=2,Timeout=3
 echo -e "\nConfigured ELB health check. Proceeding to launch EC2 instances"
   
-# launching ec2 instances
-aws ec2 run-instances --image-id $1 --count $2 --instance-type $3 --key-name $4 --user-data install-webserver.sh --subnet-id $5 --output text --security-group-ids $4 --iam-instance-profile Name=$7
-echo -e "\nLaunched 3 EC2 Instances and sleeping for one minute"
-for i in {0..60}
- do
-  echo -ne '.'
-  sleep 1;
-  done
-  
- 
-# registering instances with crested elb
+
+# registering instances with created elb
 declare -a instance_list
 mapfile -t instance_list < <(aws ec2 run-instances --image-id $1 --count $2 --instance-type $3 --key-name $4 --security-group-ids $5 --subnet-id $6 --associate-public-ip-address --iam-instance-profile Name=$7 --user-data install-webserver.sh --output table | grep InstanceId | sed "s/|//g" | tr -d ' ' | sed "s/InstanceId//g")
 aws ec2 wait instance-running --instance-ids ${instance_list[@]} 
 aws ec2 wait instance-running --instance-ids ${instance_list[@]} 
 echo "Following instances running: ${instance_list[@]}" 
-echo "\nAdding above to an array and registering with the load balancer." 
-len=${#instance_list[@]}
-for (( i=0; i<${#instance_list[@]}; i++)); 
-  do
-  echo "Registering ${instance_list[$i]} with load-balancer ITMO-544-Load-Balancer" 
-  aws elb register-instances-with-load-balancer --load-balancer-name ITMO-544-Load-Balancer --instances ${instance_list[$i]} --output=table 
+aws elb register-instances-with-load-balancer --load-balancer-name ITMO-544-Load-Balancer --instances ${instance_list[@]}
 echo -e "\n Sleeping for one minute to complete the process."
     for y in {0..60} 
     do
@@ -59,10 +45,10 @@ aws autoscaling create-launch-configuration --launch-configuration-name ITMO-544
 
 # creating autoscaling group and autoscaling policy
 aws autoscaling create-auto-scaling-group --auto-scaling-group-name ITMO-544-Auto-Scaling-Group --launch-configuration-name ITMO-544-Launch-Configuration --load-balancer-names ITMO-544-Load-Balancer --health-check-type ELB --min-size 3 --max-size 6 --desired-capacity 3 --default-cooldown 600 --health-check-grace-period 120 --vpc-zone-identifier $5
-aws autoscaling put-scaling-policy --auto-scaling-group-name ITMO-544-Auto-Scaling-Group --policy-name ITMO-544-Scaling-Policy --scaling-adjustment 1 --adjustment-type ExactCapacity
+Scaling = $(aws autoscaling put-scaling-policy --auto-scaling-group-name ITMO-544-Auto-Scaling-Group --policy-name ITMO-544-Scaling-Policy --scaling-adjustment 3 --adjustment-type ExactCapacity)
 
 # creating cloudwatch metric. got most of these directly from the documentation!
-aws cloudwatch put-metric-alarm --alarm-name ITMO-544-Alarm --metric-name CPUUtilization --namespace AWS/EC2 --statistic Average --period 60 --threshold 30 --comparison-operator GreaterThanOrEqualToThreshold --dimensions "Name=AutoScalingGroup,Value=ITMO-544-Auto-Scaling-Group" --evaluation-periods 1 --alarm-actions arn:aws:sns:us-east-1:111122223333:MyTopic --unit Percent
+aws cloudwatch put-metric-alarm --alarm-name ITMO-544-Alarm --metric-name CPUUtilization --namespace AWS/EC2 --statistic Average --period 60 --threshold 30 --comparison-operator GreaterThanOrEqualToThreshold --dimensions "Name=AutoScalingGroup,Value=ITMO-544-Auto-Scaling-Group" --evaluation-periods 1 --alarm-actions $Scaling --unit Percent
 
 # Create read replica
 aws rds-create-db-instance-read-replica ITM0-544-Database-Replica --source-db-instance-identifier-value ITMO-544-Database --output=text 

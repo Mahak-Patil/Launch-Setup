@@ -1,9 +1,9 @@
-#!/bin/bash
 
 declare -a cleanupARR
 declare -a cleanupLBARR
 declare -a dbInstanceARR
 
+echo "Initiating cleaup... Please be patient and wait for the next prompt"
 aws ec2 describe-instances --filter Name=instance-state-code,Values=16 --output table | grep InstanceId | sed "s/|//g" | tr -d ' ' | sed "s/InstanceId//g"
 
 mapfile -t cleanupARR < <(aws ec2 describe-instances --filter Name=instance-state-code,Values=16 --output table | grep InstanceId | sed "s/|//g" | tr -d ' ' | sed "s/InstanceId//g")
