@@ -3,7 +3,7 @@
 # This script launches: database subnet, AWS RDS instances, EC2 instances,read replica of created database, load balancer, cloud metrics and autoscaling group.
 # This script needs 7 arguments: ami image-id, number of EC2 instances, instance type, security group ids, subnet id, key name and iam profile
 
-# creating database subnet
+# creating database subnet with my own provided subnet ids
 DbSubnetID=$(aws rds create-db-subnet-group --db-subnet-group-name ITMO-544-Database-Subnet --subnet-ids subnet-07dd812c subnet-0fdfdd78 --db-subnet-group-description Database-subnet --output=text )
 # echo "\n Database subnet created: "$DbSubnetID
 # creating the database. Initial check done in previous, cleanup section.
