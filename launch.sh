@@ -21,7 +21,7 @@ for i in {0..60}
 
 # configuring health check
 aws elb configure-health-check --load-balancer-name ITMO-544-Load-Balancer --health-check Target=HTTP:80/index.php,Interval=30,UnhealthyThreshold=2,HealthyThreshold=2,Timeout=3
-echo -e "\nConfigured ELB health check. Proceeding to launch EC2 instances"
+echo -e "\n Configured ELB health check. Proceeding to launch EC2 instances"
   
 
 # registering instances with created elb
