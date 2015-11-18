@@ -62,3 +62,6 @@ aws sns set-topic-attributes --topic-arn $TopicARN --attribute-name DisplayName 
 
 # subscribing an endpoint to a topic
 aws sns subscribe --topic-arn $TopicARN --protocol sms --notification-endpoint 13123949795
+
+# sending message to a topic's subscribed endpoint
+aws sns publish --topic-arn $TopicARN --message file://message.txt
