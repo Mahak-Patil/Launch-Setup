@@ -7,7 +7,7 @@
 DbSubnetID=$(aws rds create-db-subnet-group --db-subnet-group-name ITMO-544-Database-Subnet --subnet-ids subnet-07dd812c subnet-0fdfdd78 --db-subnet-group-description Database-subnet --output=text )
 # echo "\n Database subnet created: "$DbSubnetID
 # creating the database. Initial check done in previous, cleanup section.
-aws rds create-db-instance --db-instance-identifier ITMO-544-Database --allocated-storage 5 --db-instance-class db.t1.micro --engine MySQL --master-username controller --master-user-password ilovebunnies --db-subnet-group-name ITMO-544-Database-Subnet --db-name ITMO-544-Database 
+aws rds create-db-instance --db-instance-identifier ITMO-544-Database --allocated-storage 5 --db-instance-class db.t1.micro --engine MySQL --master-username controller --master-user-password ilovebunnies --db-subnet-group-name ITMO-544-Database-Subnet --db-name ITMO544Database 
 aws rds wait db-instance-available --db-instance-identifier ITMO-544-Database
 
 # creating elb 
