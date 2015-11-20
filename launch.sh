@@ -45,10 +45,13 @@ aws autoscaling create-launch-configuration --launch-configuration-name ITMO-544
 
 # creating autoscaling group and autoscaling policy
 aws autoscaling create-auto-scaling-group --auto-scaling-group-name ITMO-544-Auto-Scaling-Group --launch-configuration-name ITMO-544-Launch-Configuration --load-balancer-names ITMO-544-Load-Balancer --health-check-type ELB --min-size 3 --max-size 6 --desired-capacity 3 --default-cooldown 600 --health-check-grace-period 120 --vpc-zone-identifier $5
-Scaling = $(aws autoscaling put-scaling-policy --auto-scaling-group-name ITMO-544-Auto-Scaling-Group --policy-name ITMO-544-Scaling-Policy --scaling-adjustment 3 --adjustment-type ExactCapacity)
+IncreaseScaling = $(aws autoscaling put-scaling-policy --auto-scaling-group-name ITMO-544-Auto-Scaling-Group --policy-name ITMO544IncreaseInScalingPolicy --scaling-adjustment 3 --adjustment-type ChangeInCapacity)
+DecreaseScaling = $(aws autoscaling put-scaling-policy --auto-scaling-group-name ITMO-544-Auto-Scaling-Group --policy-name ITMO544DecreaseInScalingPolicy --scaling-adjustment -3 --adjustment-type ChangeInCapacity)
 
 # creating cloudwatch metric. got most of these directly from the documentation!
-aws cloudwatch put-metric-alarm --alarm-name ITMO-544-Alarm --metric-name CPUUtilization --namespace AWS/EC2 --statistic Average --period 60 --threshold 30 --comparison-operator GreaterThanOrEqualToThreshold --dimensions "Name=AutoScalingGroup,Value=ITMO-544-Auto-Scaling-Group" --evaluation-periods 1 --alarm-actions $Scaling --unit Percent
+aws cloudwatch put-metric-alarm --alarm-name ITMO-544-Add-Alarm --metric-name CPUUtilization --namespace AWS/EC2 --statistic Average --period 60 --threshold 30 --comparison-operator GreaterThanOrEqualToThreshold --dimensions "Name=AutoScalingGroupName,Value=ITMO-544-Auto-Scaling-Group" --evaluation-periods 1 --alarm-actions $IncreaseScaling --unit Percent --alarm-description "Alarm will go off when CPU exceeds 30%"
+
+aws cloudwatch put-metric-alarm --alarm-name ITMO-544-Reduce-Alarm --metric-name CPUUtilization --namespace AWS/EC2 --statistic Average --period 60 --threshold 10 --comparison-operator LessThanOrEqualToThreshold --dimensions "Name=AutoScalingGroupName,Value=ITMO-544-Auto-Scaling-Group" --evaluation-periods 1 --alarm-actions $DecreaseScaling --unit Percent --alarm-description "Alarm will go off when CPU falls below 10%"
 
 # Create read replica
 aws rds-create-db-instance-read-replica ITM0-544-Database-Replica --source-db-instance-identifier-value ITMO-544-Database --output=text 
@@ -65,3 +68,12 @@ aws sns subscribe --topic-arn $TopicARN --protocol sms --notification-endpoint 1
 
 # sending message to a topic's subscribed endpoint
 aws sns publish --topic-arn $TopicARN --message file://sns-message.txt
+
+
+
+#Cloud Watch Metric
+
+aws cloudwatch put-metric-alarm --alarm-name AddCapacity --alarm-description "Alarm when CPU exceeds 30 percent" --metric-name CPUUtilization --namespace AWS/EC2 --statistic Average --period 60 --threshold 30 --comparison-operator GreaterThanOrEqualToThreshold --evaluation-periods 1 --unit Percent --dimensions "Name=AutoScalingGroupName,Value=$AUTOSCALINGNAME" --alarm-actions $SCALINGINCREASE
+
+aws cloudwatch put-metric-alarm --alarm-name ReduceCapacity --alarm-description "Alarm when CPU falls below 10 percent" --metric-name CPUUtilization --namespace AWS/EC2 --statistic Average --period 60 --threshold 10 --comparison-operator LessThanOrEqualToThreshold --evaluation-periods 1 --unit Percent --dimensions "Name=AutoScalingGroupName,Value=$AUTOSCALINGNAME" --alarm-actions $SCALINGDECREASE
+
