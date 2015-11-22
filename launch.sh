@@ -40,6 +40,21 @@ echo -e "\n Sleeping for one minute to complete the process."
  echo "\n"
 done
 
+
+#SNS starts here:
+SnsImageARN=(`aws sns create-topic --name SnsImageTopicName`)
+aws sns set-topic-attributes --topic-arn $SnsImageARN --attribute-name DisplayName --attribute-value $SnsImageTopicName 
+
+
+# SNS For Cloud MetricAlarm
+SnsCloudMetricARN=(`aws sns create-topic --name CloudMetricTopic`)
+aws sns set-topic-attributes --topic-arn $SnsCloudMetricARN --attribute-name DisplayName --attribute-value CloudMetricTopic
+
+#Subcribe
+
+EmailID=mpatil@hawk.iit.edu
+aws sns subscribe --topic-arn $SnsCloudMetricARN --protocol email --notification-endpoint $EmailID
+
 # creating launch configuration
 aws autoscaling create-launch-configuration --launch-configuration-name ITMO-544-Launch-Configuration --image-id $1 --key-name $6 --security-groups $4 --instance-type $3 --user-data install-webserver.sh --iam-instance-profile $7
 
@@ -69,5 +84,3 @@ aws sns set-topic-attributes --topic-arn $TopicARN --attribute-name DisplayName 
 
 # sending message to a topic's subscribed endpoint
 #aws sns publish --topic-arn $TopicARN --message file://sns-message.txt
-
-
